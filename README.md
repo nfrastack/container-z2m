@@ -89,9 +89,10 @@ The following directories are used for configuration and can be mapped for persi
 This image relies on a customized base image in order to work.
 Be sure to view the following repositories to understand all the customizable options:
 
-| Image                                                   | Description |
-| ------------------------------------------------------- | ----------- |
-| [OS Base](https://github.com/nfrastack/container-base/) | Base Image  |
+| Image                                                   | Description      |
+| ------------------------------------------------------- | ---------------- |
+| [OS Base](https://github.com/nfrastack/container-base/) | Base Image       |
+| [Nginx](https://github.com/nfrastack/container-nginx/)  | Web Server Image |
 
 Below is the complete list of available options that can be used to customize your installation.
 
@@ -99,102 +100,102 @@ Below is the complete list of available options that can be used to customize yo
 
 #### Core Configuration
 
-| Variable         | Description                                                                 | Default   |
-|------------------|-----------------------------------------------------------------------------|-----------|
-| SETUP_MODE       | Auto configure on startup, set to MANUAL to disable                         | `AUTO`      |
-| ENABLE_NGINX     | Enable Nginx web server                                                     | `TRUE`      |
-| Z2M_USER         | User to run Z2M                                                             | `z2m`       |
-| Z2M_GROUP        | Group to run Z2M                                                            | `z2m`       |
+| Variable     | Description                                         | Default |
+| ------------ | --------------------------------------------------- | ------- |
+| SETUP_MODE   | Auto configure on startup, set to MANUAL to disable | `AUTO`  |
+| ENABLE_NGINX | Enable Nginx web server                             | `TRUE`  |
+| Z2M_USER     | User to run Z2M                                     | `z2m`   |
+| Z2M_GROUP    | Group to run Z2M                                    | `z2m`   |
 
 #### Logging
 
-| Variable             | Description                                 | Default           |
-|----------------------|---------------------------------------------|-------------------|
-| LOG_FILE             | Log file name                               | `z2m.log`           |
-| LOG_TYPE             | Log type (console, file, both, none)        | `both`              |
-| LOG_LEVEL            | Log level                                   | `info`              |
-| LOG_PATH             | Log directory                               | `/logs/`            |
-| LOG_TIMESTAMP_FORMAT | Log timestamp format                        | `YYYY-MM-DDTHH:mm:ss` |
+| Variable             | Description                          | Default               |
+| -------------------- | ------------------------------------ | --------------------- |
+| LOG_FILE             | Log file name                        | `z2m.log`             |
+| LOG_TYPE             | Log type (console, file, both, none) | `both`                |
+| LOG_LEVEL            | Log level                            | `info`                |
+| LOG_PATH             | Log directory                        | `/logs/`              |
+| LOG_TIMESTAMP_FORMAT | Log timestamp format                 | `YYYY-MM-DDTHH:mm:ss` |
 
 #### Data & Configuration
 
-| Variable     | Description                        | Default      |
-|--------------|------------------------------------|--------------|
-| CONFIG_FILE  | Main configuration file            | `configuration.yaml` |
-| DATA_PATH    | Data directory                     | `/data/`       |
+| Variable    | Description             | Default              |
+| ----------- | ----------------------- | -------------------- |
+| CONFIG_FILE | Main configuration file | `configuration.yaml` |
+| DATA_PATH   | Data directory          | `/data/`             |
 
 #### MQTT Configuration
 
-| Variable                      | Description                                 | Default              |
-|-------------------------------|---------------------------------------------|----------------------|
-| MQTT_HOST                     | MQTT broker hostname                        | `mqtt://mqtt`          |
-| MQTT_TOPIC_BASE               | Base topic for MQTT                         | `zigbee2mqtt`          |
-| MQTT_REJECT_UNAUTHORIZED      | Reject unauthorized MQTT connections        | `true`          |
-| MQTT_INCLUDE_DEVICE_INFORMATION| Include device info in MQTT                 | `false`                |
-| MQTT_KEEPALIVE                | MQTT keepalive interval (seconds)           | `60`                   |
-| MQTT_VERSION                  | MQTT protocol version                       | `4`                    |
-| MQTT_FORCE_DISABLE_RETAIN     | Disable retain flag on MQTT messages        | `false`                |
+| Variable                        | Description                          | Default       |
+| ------------------------------- | ------------------------------------ | ------------- |
+| MQTT_HOST                       | MQTT broker hostname                 | `mqtt://mqtt` |
+| MQTT_TOPIC_BASE                 | Base topic for MQTT                  | `zigbee2mqtt` |
+| MQTT_REJECT_UNAUTHORIZED        | Reject unauthorized MQTT connections | `true`        |
+| MQTT_INCLUDE_DEVICE_INFORMATION | Include device info in MQTT          | `false`       |
+| MQTT_KEEPALIVE                  | MQTT keepalive interval (seconds)    | `60`          |
+| MQTT_VERSION                    | MQTT protocol version                | `4`           |
+| MQTT_FORCE_DISABLE_RETAIN       | Disable retain flag on MQTT messages | `false`       |
 
 #### Adapter/Coordinator
 
-| Variable             | Description                                 | Default      |
-|----------------------|---------------------------------------------|--------------|
-| ADAPTER_LOCATION     | Zigbee adapter location                     | `(none)`       |
-| ADAPTER_DISABLE_LED  | Disable adapter LED                         | `false`       |
-| ADAPTER_BAUDRATE     | Adapter baudrate                            | `115200`       |
-| ADAPTER_DRIVER       | Adapter driver                              | `ember`       |
-| ADAPTER_RTSCTS       | Enable RTS/CTS flow control                 | `false`       |
+| Variable            | Description                 | Default  |
+| ------------------- | --------------------------- | -------- |
+| ADAPTER_LOCATION    | Zigbee adapter location     | `(none)` |
+| ADAPTER_DISABLE_LED | Disable adapter LED         | `false`  |
+| ADAPTER_BAUDRATE    | Adapter baudrate            | `115200` |
+| ADAPTER_DRIVER      | Adapter driver              | `ember`  |
+| ADAPTER_RTSCTS      | Enable RTS/CTS flow control | `false`  |
 
 #### Zigbee Network
 
-| Variable                | Description                              | Default      |
-|-------------------------|------------------------------------------|--------------|
-| ZIGBEE_CHANNEL          | Zigbee channel                           | `25`           |
-| ZIGBEE_TRANSMIT_POWER   | Zigbee transmit power                    | `20`           |
-| ZIGBEE_NETWORK_KEY      | Zigbee network key                       | (none)       |
-| ZIGBEE_EXT_PAN_ID       | Zigbee extended PAN ID                   | (none)       |
-| ZIGBEE_PAN_ID           | Zigbee PAN ID                            | (none)       |
+| Variable              | Description            | Default |
+| --------------------- | ---------------------- | ------- |
+| ZIGBEE_CHANNEL        | Zigbee channel         | `25`    |
+| ZIGBEE_TRANSMIT_POWER | Zigbee transmit power  | `20`    |
+| ZIGBEE_NETWORK_KEY    | Zigbee network key     | (none)  |
+| ZIGBEE_EXT_PAN_ID     | Zigbee extended PAN ID | (none)  |
+| ZIGBEE_PAN_ID         | Zigbee PAN ID          | (none)  |
 
 #### Home Assistant Integration
 
-| Variable                          | Description                                 | Default      |
-|-----------------------------------|---------------------------------------------|--------------|
-| ENABLE_HOMEASSISTANT              | Enable Home Assistant integration           | `false`        |
-| HOMEASSISTANT_MQTT_TOPIC_DISCOVERY| Home Assistant MQTT discovery topic         | `homeassistant` |
-| HOMEASSISTANT_MQTT_TOPIC_STATUS   | Home Assistant MQTT status topic            | `hass/status`  |
-| HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES | Use legacy entity attributes           | `false`        |
-| HOMEASSISTANT_LEGACY_TRIGGERS     | Use legacy triggers                         | `false`        |
+| Variable                               | Description                         | Default         |
+| -------------------------------------- | ----------------------------------- | --------------- |
+| ENABLE_HOMEASSISTANT                   | Enable Home Assistant integration   | `false`         |
+| HOMEASSISTANT_MQTT_TOPIC_DISCOVERY     | Home Assistant MQTT discovery topic | `homeassistant` |
+| HOMEASSISTANT_MQTT_TOPIC_STATUS        | Home Assistant MQTT status topic    | `hass/status`   |
+| HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES | Use legacy entity attributes        | `false`         |
+| HOMEASSISTANT_LEGACY_TRIGGERS          | Use legacy triggers                 | `false`         |
 
 #### Frontend (Web Interface)
 
-| Variable             | Description                                 | Default      |
-|----------------------|---------------------------------------------|--------------|
-| ENABLE_FRONTEND      | Enable Z2M frontend web interface           | `true`         |
-| FRONTEND_LISTEN_PORT | Frontend listen port                        | `8080`         |
-| FRONTEND_LISTEN_IP   | Frontend listen IP                          | `0.0.0.0`      |
+| Variable             | Description                       | Default   |
+| -------------------- | --------------------------------- | --------- |
+| ENABLE_FRONTEND      | Enable Z2M frontend web interface | `true`    |
+| FRONTEND_LISTEN_PORT | Frontend listen port              | `8080`    |
+| FRONTEND_LISTEN_IP   | Frontend listen IP                | `0.0.0.0` |
 
 #### OTA (Over-the-Air Updates)
 
-| Variable                        | Description                                 | Default      |
-|---------------------------------|---------------------------------------------|--------------|
-| ENABLE_OTA                      | Enable OTA updates                          | `TRUE`         |
-| OTA_ENABLE_AUTO_UPDATE_CHECK    | Enable auto OTA update check                | `false`        |
-| OTA_AUTO_UPDATE_CHECK_INTERVAL  | OTA update check interval (minutes)         | `1440`         |
+| Variable                       | Description                         | Default |
+| ------------------------------ | ----------------------------------- | ------- |
+| ENABLE_OTA                     | Enable OTA updates                  | `TRUE`  |
+| OTA_ENABLE_AUTO_UPDATE_CHECK   | Enable auto OTA update check        | `false` |
+| OTA_AUTO_UPDATE_CHECK_INTERVAL | OTA update check interval (minutes) | `1440`  |
 
 #### Device Availability
 
-| Variable                             | Description                                 | Default      |
-|--------------------------------------|---------------------------------------------|--------------|
-| ENABLE_DEVICE_AVAILABILITY           | Enable device availability tracking         | `false`        |
-| DEVICE_AVAILABILITY_ACTIVE_TIMEOUT   | Active timeout (seconds)                    | `10`           |
-| DEVICE_AVAILABILITY_PASSIVE_TIMEOUT  | Passive timeout (seconds)                   | `1500`         |
+| Variable                            | Description                         | Default |
+| ----------------------------------- | ----------------------------------- | ------- |
+| ENABLE_DEVICE_AVAILABILITY          | Enable device availability tracking | `false` |
+| DEVICE_AVAILABILITY_ACTIVE_TIMEOUT  | Active timeout (seconds)            | `10`    |
+| DEVICE_AVAILABILITY_PASSIVE_TIMEOUT | Passive timeout (seconds)           | `1500`  |
 
 #### Watchdog
 
-| Variable           | Description                                 | Default      |
-|--------------------|---------------------------------------------|--------------|
-| ENABLE_WATCHDOG    | Enable watchdog monitoring                  | `TRUE`         |
-| WATCHDOG_INTERVAL  | Watchdog interval(s)                        | `0.5,1,1,1,1,5,5` |
+| Variable          | Description                | Default           |
+| ----------------- | -------------------------- | ----------------- |
+| ENABLE_WATCHDOG   | Enable watchdog monitoring | `TRUE`            |
+| WATCHDOG_INTERVAL | Watchdog interval(s)       | `0.5,1,1,1,1,5,5` |
 
 ## Users and Groups
 
