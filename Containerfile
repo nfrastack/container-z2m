@@ -58,7 +58,7 @@ RUN echo "" && \
                     && \
     \
     source /container/base/functions/container/build && \
-    container_build_log && \
+    container_build_log image && \
     create_user z2m 2323 z2m 2323 /dev/null && \
     package update && \
     package upgrade && \
@@ -90,6 +90,7 @@ RUN echo "" && \
     \
     npm rebuild --build-from-source && \
     \
+    container_build_log add "Zigbee2MQTT" "${Z2M_VERSION}" "${Z2M_REPO_URL}" && \
     package remove \
                     Z2M_BUILD_DEPS \
                     && \
