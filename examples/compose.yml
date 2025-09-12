@@ -1,6 +1,6 @@
 services:
   z2m-app:
-    image: tiredofit/z2m:latest
+    image: nfrastack/z2m:latest
     container_name: z2m-app
     labels:
       - traefik.enable=true
@@ -13,7 +13,7 @@ services:
       - ./logs/z2m:/logs
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=z2m-app
+
       - SETUP_MODE=AUTO
 
       - MQTT_HOST=mqtt://mqtt
@@ -37,7 +37,7 @@ services:
     restart: always
 
   mqtt-app:
-    image: tiredofit/mosquitto:latest
+    image: nfrastack/mosquitto:latest
     container_name: mqtt-app
     #ports:
       #- 1883:1883
@@ -47,7 +47,6 @@ services:
       - ./logs/mosquitto:/logs
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=mqtt-app
 
       - LISTEN_PORT=1883
 

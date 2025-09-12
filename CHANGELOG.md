@@ -1,3 +1,9 @@
+## 1.1.0pre 2025-09-11 <code at nfrastack dot com>
+
+   ### Added
+      - Switch base image to nfrastack/container-nginx
+
+
 ## 1.0.23 2025-09-11 <dave at tiredofit dot ca>
 
    ### Added

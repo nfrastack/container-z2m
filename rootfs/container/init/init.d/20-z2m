@@ -1,0 +1,16 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+set -a
+prepare_service 20-z2m
+set +a
+SERVICE_NAME="z2m"
+
+z2m_bootstrap_filesystem
+z2m_generate_config
+z2m_configure_proxy
+
+liftoff

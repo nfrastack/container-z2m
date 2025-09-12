@@ -1,12 +1,16 @@
-#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
 CONFIG_FILE=${CONFIG_FILE:-"configuration.yaml"}
 DATA_PATH=${DATA_PATH:-"/data/"}
+
 LOG_FILE=${LOG_FILE:-"z2m.log"}
 LOG_TYPE=${LOG_TYPE:-"both"}
 LOG_LEVEL=${LOG_LEVEL:-"info"}
 LOG_PATH=${LOG_PATH:-"/logs/"}
 LOG_TIMESTAMP_FORMAT=${LOG_TIMESTAMP_FORMAT:-"YYYY-MM-DDTHH:mm:ss"}
+
 SETUP_MODE=${SETUP_MODE:-"AUTO"}
 ENABLE_NGINX=${ENABLE_NGINX:-"TRUE"}
 

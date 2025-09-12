@@ -1,0 +1,28 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+SERVICE_NAME="z2m"
+prepare_service 20-z2m
+
+check_container_initialized
+check_service_initialized init
+
+liftoff
+
+cd /app
+if var_true "${ENABLE_WATCHDOG}" ; then
+    export Z2M_WATCHDOG="${WATCHDOG_INTERVAL}"
+fi
+
+export ZIGBEE2MQTT_CONFIG="${DATA_PATH}/${CONFIG_FILE}"
+export ZIGBEE2MQTT_DATA="${DATA_PATH}"
+
+print_start "Starting Zigbee2MQTT $(jq -r .version /app/package.json)"
+
+
+exec s6-setuidgid z2m  \
+                        node \
+                                index.js
