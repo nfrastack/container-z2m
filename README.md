@@ -2,11 +2,7 @@
 
 ## About
 
-This repository will build a container with [Clam Antivirus](https://www.z2m.net) to scan files or mail messages.
-
-* Auto Configuration Support
-* Automatic Downlad and update of Virus Definitions
-* Ability to load custom definitions
+This repository will build a container with [Zigbee2MQTT](https://www.zigbee2mqtt.io/). A Zigbee Coordinator.
 
 ## Maintainer
 
