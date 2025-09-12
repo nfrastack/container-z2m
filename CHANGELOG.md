@@ -1,3 +1,10 @@
+## 1.0.23 2025-09-11 <dave at tiredofit dot ca>
+
+   ### Added
+      - Zigbee2MQTT 2.6.1
+      - Add EOL notice
+
+
 ## 1.0.22 2025-08-16 <dave at tiredofit dot ca>
 
    ### Added
