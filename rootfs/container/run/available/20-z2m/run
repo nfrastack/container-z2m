@@ -20,9 +20,7 @@ fi
 export ZIGBEE2MQTT_CONFIG="${DATA_PATH}/${CONFIG_FILE}"
 export ZIGBEE2MQTT_DATA="${DATA_PATH}"
 
-print_start "Starting Zigbee2MQTT $(jq -r .version /app/package.json)"
-
-
+print_start "Starting Zigbee2MQTT $(yq -r .version /app/package.json)"
 exec s6-setuidgid z2m  \
                         node \
                                 index.js
