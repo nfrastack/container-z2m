@@ -19,6 +19,7 @@ fi
 
 export ZIGBEE2MQTT_CONFIG="${DATA_PATH}/${CONFIG_FILE}"
 export ZIGBEE2MQTT_DATA="${DATA_PATH}"
+CONTAINER_PROCESS_RUNAWAY_PROTECTOR=FALSE
 
 print_start "Starting Zigbee2MQTT $(yq -r .version /app/package.json)"
 exec s6-setuidgid z2m  \
