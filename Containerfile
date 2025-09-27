@@ -52,6 +52,7 @@ RUN echo "" && \
                     && \
     Z2M_RUN_DEPS_ALPINE=" \
                             eudev \
+                            moreutils \
                             nodejs \
                             yq-go \
                         " \

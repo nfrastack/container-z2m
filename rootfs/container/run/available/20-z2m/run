@@ -24,4 +24,4 @@ CONTAINER_PROCESS_RUNAWAY_PROTECTOR=FALSE
 print_start "Starting Zigbee2MQTT $(yq -r .version /app/package.json)"
 exec s6-setuidgid z2m  \
                         node \
-                                index.js
+                                index.js | ts -m '%Y-%m-%dT%H:%M:%S'
