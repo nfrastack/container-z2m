@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_IMAGE
-ARG DISTRO
-ARG DISTRO_VARIANT
+ARG \
+    BASE_IMAGE \
+    DISTRO \
+    DISTRO_VARIANT
 
 FROM ${BASE_IMAGE}:${DISTRO}_${DISTRO_VARIANT}
 
@@ -19,7 +20,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    Z2M_VERSION="2.6.1" \
+    Z2M_VERSION="2.6.2" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt"
 
 
