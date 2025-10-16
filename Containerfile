@@ -3,11 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 ARG \
-    BASE_IMAGE \
-    DISTRO \
-    DISTRO_VARIANT
+    BASE_IMAGE
 
-FROM ${BASE_IMAGE}:${DISTRO}_${DISTRO_VARIANT}
+FROM ${BASE_IMAGE}
 
 LABEL \
         org.opencontainers.image.title="Z2M" \
@@ -55,7 +53,6 @@ RUN echo "" && \
                             eudev \
                             moreutils \
                             nodejs \
-                            yq-go \
                         " \
                     && \
     \
@@ -68,6 +65,8 @@ RUN echo "" && \
                         Z2M_BUILD_DEPS \
                         Z2M_RUN_DEPS \
                     && \
+    package build go && \
+    package build yq && \
     \
     clone_git_repo "${Z2M_REPO_URL}" "${Z2M_VERSION}" /usr/src/z2m && \
     npm install && \
