@@ -2,7 +2,7 @@
 
    ### Added
       - Switch base image to nfrastack/container-nginx
-
+      - Zigbee2MQTT 2.6.2
 
 ## 1.0.23 2025-09-11 <dave at tiredofit dot ca>
 
