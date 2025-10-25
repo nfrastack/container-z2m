@@ -21,7 +21,6 @@ ARG \
     Z2M_VERSION="2.6.2" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt"
 
-
 COPY CHANGELOG.md /usr/src/container/CHANGELOG.md
 COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
