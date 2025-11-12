@@ -10,7 +10,7 @@ z2m_bootstrap_filesystem() {
 
     case "${LOG_TYPE,,}" in
         file | both)
-            create_logrotate z2m "${LOG_PATH}"/"${LOG_FILE}" z2m "${Z2M_USER}" "${Z2M_GROUP}"
+            create_logrotate z2m "${LOG_PATH%/}"/"${LOG_FILE}" z2m "${Z2M_USER}" "${Z2M_GROUP}"
         ;;
     esac
 }
@@ -28,9 +28,9 @@ z2m_configure_proxy() {
 
 z2m_generate_config() {
     if [ "${SETUP_MODE,,}" = "auto" ]; then
-        if [ ! -f "${DATA_PATH}"/"${CONFIG_FILE}" ] ; then
-            sudo -u "${Z2M_USER}" touch "${DATA_PATH}"/"${CONFIG_FILE}"
-            cat <<EOF | silent sudo -u "${Z2M_USER}" tee -a "${DATA_PATH}"/"${CONFIG_FILE}"
+        if [ ! -f "${DATA_PATH%/}"/"${CONFIG_FILE}" ] ; then
+            sudo -u "${Z2M_USER}" touch "${DATA_PATH%/}"/"${CONFIG_FILE}"
+            cat <<EOF | silent sudo -u "${Z2M_USER}" tee -a "${DATA_PATH%/}"/"${CONFIG_FILE}"
 # Z2M Configuration
 # First Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 EOF
@@ -43,63 +43,63 @@ EOF
         if [ -n "${ADAPTER_LOCATION}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .serial.port = env(ADAPTER_LOCATION)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ADAPTER_BAUDRATE}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .serial.baudrate = env(ADAPTER_BAUDRATE)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ADAPTER_DRIVER}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .serial.adapter = env(ADAPTER_DRIVER)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ADAPTER_RTSCTS}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .serial.rtscts = env(ADAPTER_RTSCTS)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ADAPTER_DISABLE_LED}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .serial.disable_led = env(ADAPTER_DISABLE_LED)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         ## MQTT Settings
         if [ -n "${MQTT_TOPIC_BASE}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .mqtt.base_topic = env(MQTT_TOPIC_BASE)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${MQTT_HOST}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .mqtt.server = env(MQTT_HOST)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
 
         if [ -n "${MQTT_USER}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .mqtt.user = env(MQTT_USER)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${MQTT_PASS}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .mqtt.password = env(MQTT_PASS)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${MQTT_CLIENT_ID}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .mqtt.client_id = env(MQTT_CLIENT_ID)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         s6-setuidgid "${Z2M_USER}" yq -i    '
@@ -108,7 +108,7 @@ EOF
                                                 .mqtt.keepalive = env(MQTT_KEEPALIVE) |
                                                 .mqtt.version = env(MQTT_VERSION) |
                                                 .mqtt.force_disable_retain = env(MQTT_FORCE_DISABLE_RETAIN)
-                                            ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                            ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
 
 
         ## Advanced
@@ -116,50 +116,50 @@ EOF
         if [ -n "${ZIGBEE_NETWORK_KEY}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.network_key = ['$(echo "${ZIGBEE_NETWORK_KEY}")']
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
 
-        if [ "$(yq '.advanced.network_key' "${DATA_PATH}"/"${CONFIG_FILE}")" = "null" ]; then
+        if [ "$(yq '.advanced.network_key' "${DATA_PATH%/}"/"${CONFIG_FILE}")" = "null" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.network_key = "GENERATE"
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ZIGBEE_CHANNEL}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.channel = env(ZIGBEE_CHANNEL)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ZIGBEE_TRANSMIT_POWER}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.transmit_power = env(ZIGBEE_TRANSMIT_POWER)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ZIGBEE_EXT_PAN_ID}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.ext_pan_id = ['$(echo "${ZIGBEE_EXT_PAN_ID}")']
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
-        if [ "$(yq '.advanced.ext_pan_id' "${DATA_PATH}"/"${CONFIG_FILE}")" = "null" ]; then
+        if [ "$(yq '.advanced.ext_pan_id' "${DATA_PATH%/}"/"${CONFIG_FILE}")" = "null" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.ext_pan_id = "GENERATE"
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         if [ -n "${ZIGBEE_PAN_ID}" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.pan_id = env(ZIGBEE_PAN_ID)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
-        if [ "$(yq '.advanced.pan_id' "${DATA_PATH}"/"${CONFIG_FILE}")" = "null" ]; then
+        if [ "$(yq '.advanced.pan_id' "${DATA_PATH%/}"/"${CONFIG_FILE}")" = "null" ]; then
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .advanced.pan_id = "GENERATE"
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         ### Logging
@@ -167,24 +167,24 @@ EOF
             both)
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .advanced.log_output = ["console","file"]
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             ;;
             console)
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .advanced.log_output = ["console"]
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             ;;
             file)
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .advanced.log_output = ["file"]
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             ;;
             none)
                 export LOG_PATH=/dev
                 export LOG_FILE=/null
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .advnced.log_output = ["file"]
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             ;;
         esac
 
@@ -194,7 +194,7 @@ EOF
                                                     .advanced.log_directory = env(LOG_PATH) |
                                                     .advanced.timestamp_format = env(LOG_TIMESTAMP_FORMAT) |
                                                     .advanced.log_file = env(LOG_FILE)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
 
         ## Home Assistant
         if var_true "${ENABLE_HOMEASSISTANT}" ; then
@@ -203,11 +203,11 @@ EOF
                                                     .homeassistant.status_topic = env(HOMEASSISTANT_MQTT_TOPIC_STATUS) |
                                                     .homeassistant.legacy_entity_attributes = env(HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES) |
                                                     .homeassistant.legacy_triggers = env(HOMEASSISTANT_LEGACY_TRIGGERS)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         else
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     (del .homeassistant)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         ## Frontend - Web Interface
@@ -215,17 +215,17 @@ EOF
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     .frontend.host = env(FRONTEND_LISTEN_IP) |
                                                     .frontend.port = env(FRONTEND_LISTEN_PORT)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
 
             if [ -n "${FRONTEND_PASS}" ]; then
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .frontend.auth_token = env(FRONTEND_PASS)
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             fi
         else
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     (del .frontend)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         ## OTA
@@ -234,17 +234,17 @@ EOF
                                                     .ota.homeassistant.update_check_inteval = env(HOMEASSISTANT_MQTT_TOPIC_STATUS) |
                                                     .ota.homeassistant.disable_automatic_update_check = env(OTA_ENABLE_AUTO_UPDATE_CHECK) |
                                                     .ota.homeassistant.update_check_interval = env(OTA_AUTO_UPDATE_CHECK_INTERVAL)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
 
             if [ -n "${OTA_OVERRIDE_INDEX_FILE}" ]; then
                 s6-setuidgid "${Z2M_USER}" yq -i    '
                                                         .ota.zigbee_ota_override_index_location = env(OTA_OVERRIDE_INDEX_FILE)
-                                                    ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                    ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
             fi
         else
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     (del .ota)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
 
         ## Device Availability
@@ -252,12 +252,12 @@ EOF
             s6-setuidgid "${Z2M_USER}" yq -i   '
                                                     .availability.active.timeout = env(DEVICE_AVAILABILITY_ACTIVE_TIMEOUT) |
                                                     .availability.passive.timeout = env(DEVICE_AVAILABILITY_PASSIVE_TIMEOUT)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
 
         else
             s6-setuidgid "${Z2M_USER}" yq -i    '
                                                     (del .availability)
-                                                ' "${DATA_PATH}"/"${CONFIG_FILE}"
+                                                ' "${DATA_PATH%/}"/"${CONFIG_FILE}"
         fi
     fi
 }
