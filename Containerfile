@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    Z2M_VERSION="2.6.3" \
+    Z2M_VERSION="2.7.0" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt"
 
 COPY CHANGELOG.md /usr/src/container/CHANGELOG.md
