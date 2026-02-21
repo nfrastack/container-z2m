@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -17,12 +17,8 @@ z2m_bootstrap_filesystem() {
 
 z2m_configure_proxy() {
     if var_false "${ENABLE_NGINX}" || var_false "${ENABLE_FRONTEND}" ; then
-        print_warn "Disabling Nginx - Using Z2M Frontend in place server - Be sure to set Authentication!"
+        print_warn "Disabling Nginx Proxy - Using Z2M Frontend in place server - Be sure to set Authentication!"
             service_stop 10-nginx
-    else
-        sed -i \
-                -e "s|{{FRONTEND_LISTEN_PORT}}|${FRONTEND_LISTEN_PORT}|g" \
-            /etc/nginx/sites.available/"${NGINX_SITE_ENABLED}".conf
     fi
 }
 

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -26,17 +26,18 @@ COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
 
 ENV \
-    NGINX_SITE_ENABLED=z2m \
-    NGINX_WEBROOT=/var/lib/nginx/wwwroot \
-    NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
-    NGINX_LOG_ACCESS_LOCATION=/logs/nginx \
-    NGINX_LOG_ERROR_LOCATION=/logs/nginx \
-    NGINX_WORKER_PROCESSES=1 \
-    NODE_ENVIRONMENT=production \
     IMAGE_NAME="nfrastack/z2m" \
     IMAGE_REPO_URL="https://github.com/nfrastack/docker-z2m/"
 
 RUN echo "" && \
+    BUILD_ENV=" \
+                ENABLE_NGINX=TRUE \
+                NGINX_MODE=proxy \
+                NGINX_PROXY_URL='http://localhost:[env:FRONTEND_LISTEN_PORT]' \
+                NGINX_SITE_ENABLED=z2m \
+                NODE_ENVIRONMENT=production \
+              " \
+              && \
     Z2M_BUILD_DEPS_ALPINE=" \
                             g++ \
                             gcc \
@@ -68,6 +69,7 @@ RUN echo "" && \
     package build yq && \
     \
     clone_git_repo "${Z2M_REPO_URL}" "${Z2M_VERSION}" /usr/src/z2m && \
+    export NODE_ENVIRONMENT=production && \
     npm install && \
     npm run build && \
     mkdir /app && \

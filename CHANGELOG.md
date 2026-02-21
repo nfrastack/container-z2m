@@ -1,8 +1,10 @@
-## 1.1.0pre 2025-09-11 <code at nfrastack dot com>
+## 1.1.0 2026-02-21 <code at nfastack dot com>
 
    ### Added
-      - Switch base image to nfrastack/container-nginx
-      - Zigbee2MQTT 2.7.2
+      - Zigbee2MQTT 2.8.0
+      - Switch to nfrastack/container-nginx:8.0.0
+      - Alpine 3.2.3
+
 
 ## 1.0.23 2025-09-11 <dave at tiredofit dot ca>
 
