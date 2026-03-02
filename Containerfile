@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    Z2M_VERSION="2.8.0" \
+    Z2M_VERSION="2.9.0" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt"
 
 COPY CHANGELOG.md /usr/src/container/CHANGELOG.md
@@ -31,10 +31,10 @@ ENV \
 
 RUN echo "" && \
     BUILD_ENV=" \
-                ENABLE_NGINX=TRUE \
-                NGINX_MODE=proxy \
-                NGINX_PROXY_URL='http://localhost:[env:FRONTEND_LISTEN_PORT]' \
-                NGINX_SITE_ENABLED=z2m \
+                10-nginx/ENABLE_NGINX=TRUE \
+                10-nginx/NGINX_MODE=proxy \
+                10-nginx/NGINX_PROXY_URL='http://localhost:[env:FRONTEND_LISTEN_PORT]' \
+                10-nginx/NGINX_SITE_ENABLED=z2m \
                 NODE_ENVIRONMENT=production \
               " \
               && \
