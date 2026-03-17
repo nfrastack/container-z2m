@@ -1,3 +1,9 @@
+## 1.1.1 2026-03-17 <code at nfastack dot com>
+
+   ### Added
+      - Zigbee2MQTT 2.9.1
+
+
 ## 1.1.0 2026-02-21 <code at nfastack dot com>
 
    ### Added
