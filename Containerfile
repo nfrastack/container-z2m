@@ -65,7 +65,7 @@ RUN echo "" && \
                         Z2M_BUILD_DEPS \
                         Z2M_RUN_DEPS \
                     && \
-    package build go && \
+    package build go buildtime && \
     package build yq && \
     \
     clone_git_repo "${Z2M_REPO_URL}" "${Z2M_VERSION}" /usr/src/z2m && \
