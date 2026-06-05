@@ -15,7 +15,7 @@ mcp_bootstrap_filesystem() {
     esac
 
     write_file root:root@/usr/local/bin/start-mcp:755 << EOF
-    #!/command/with-contenv bash
+#!/command/with-contenv bash
 # SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
@@ -32,11 +32,6 @@ exec s6-setuidgid "${MCP_USER}" \
                         node \
                                 dist/index.js | ts -m '%Y-%m-%dT%H:%M:%S'
 EOF
-}
-
-mcp_preflight_check() {
-    sanity_var MCP_MQTT_HOST "Hostname or IP address of your MQTT broker"
-    sanity_var MCP_MQTT_TOPIC_BASE "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
 }
 
 mcp_generate_environment() {
@@ -57,4 +52,9 @@ mcp_generate_environment() {
     fi
 
     export DB_PATH="${MCP_DATA_PATH%/}/${MCP_DATA_FILE}"
+}
+
+mcp_preflight_check() {
+    sanity_var MCP_MQTT_HOST "Hostname or IP address of your MQTT broker"
+    sanity_var MCP_MQTT_TOPIC_BASE "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
 }
