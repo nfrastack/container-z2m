@@ -35,8 +35,8 @@ EOF
 }
 
 mcp_preflight_check() {
-    sanity_var MCP_MQTT_BROKER_HOST "Hostname or IP address of your MQTT broker"
-    sanity_var MCP_MQTT_BASE_TOPIC "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
+    sanity_var MCP_MQTT_HOST "Hostname or IP address of your MQTT broker"
+    sanity_var MCP_MQTT_TOPIC_BASE "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
 }
 
 mcp_generate_environment() {
@@ -44,8 +44,8 @@ mcp_generate_environment() {
         export MQTT_BROKER_URL="${MCP_MQTT_HOST}"
     fi
 
-    if [ -n "${MCP_MQTT_BASE_TOPIC}" ]; then
-        export MQTT_BASE_TOPIC="${MCP_MQTT_BASE_TOPIC}"
+    if [ -n "${MCP_MQTT_TOPIC_BASE}" ]; then
+        export MQTT_BASE_TOPIC="${MQTT_TOPIC_BASE}"
     fi
 
     if [ -n "${MCP_MQTT_USER}" ]; then
