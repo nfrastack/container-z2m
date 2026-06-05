@@ -1,0 +1,20 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+prepare_service 30-z2m
+prepare_service 31-mcp
+SERVICE_NAME="mcp"
+
+if var_true "${ENABLE_MCP}" ; then
+    print_info "Enabling MCP Functionality - use 'start-mcp' to start the service"
+    mcp_preflight_check
+    mcp_bootstrap_filesystem
+else
+    print_debug "MCP is disabled - Skipping initialization"
+    liftoff
+fi
+
+liftoff

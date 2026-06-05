@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+ENABLE_MCP=${ENABLE_MCP:-"TRUE"}
+MCP_DATA_FILE=${MCP_DATA_FILE:-"z2m-mcp.db"}
+MCP_DATA_PATH=${MCP_DATA_PATH:-"${DATA_PATH}/mcp/"}
+MCP_GROUP=${MCP_GROUP:-"mcp"}
+MCP_LOG_FILE=${MCP_LOG_FILE:-"mcp.log"}
+MCP_LOG_LEVEL=${MCP_LOG_LEVEL:-"info"} # debug, info, warn, error, silent
+MCP_LOG_PATH=${MCP_LOG_PATH:-"${LOG_PATH%/}/mcp/"}
+MCP_LOG_TYPE=${MCP_LOG_TYPE:-"console"}
+MCP_MQTT_HOST=${MCP_MQTT_HOST:-"${MQTT_HOST}"}
+MCP_MQTT_TOPIC_BASE=${MCP_MQTT_TOPIC_BASE:-"${MCP_MQTT_TOPIC_BASE}"}
+MCP_USER=${MCP_USER:-"mcp"}

@@ -19,7 +19,9 @@ LABEL \
 
 ARG \
     Z2M_VERSION="2.11.0" \
-    Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt"
+    Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt" \
+    MCP_VERSION="dc3e5dea11238c5e55e8f79e6117f05a2507d927" \
+    MCP_REPO_URL="https://github.com/ichbinder/MCP2ZigBee2MQTT"
 
 COPY CHANGELOG.md /usr/src/container/CHANGELOG.md
 COPY LICENSE /usr/src/container/LICENSE
@@ -93,6 +95,22 @@ RUN echo "" && \
     npm rebuild --build-from-source && \
     \
     container_build_log add "Zigbee2MQTT" "${Z2M_VERSION}" "${Z2M_REPO_URL}" && \
+    \
+    create_user mcp 23023 mcp 23023 /dev/null && \
+    add_user_group mcp z2m && \
+    clone_git_repo "${MCP_REPO_URL}" "${MCP_VERSION}" /usr/src/mcp && \
+    npm install && \
+    npm run build && \
+    mkdir -p /app/mcp && \
+    cp -aR \
+            *.md \
+            LICENSE \
+            dist \
+            node_modules \
+            package*.* \
+                /app/mcp/ \
+            && \
+    container_build_log add "MCP Zigbee2MQTT" "${MCP_VERSION}" "${MCPZ_REPO_URL}" && \
     package remove \
                     Z2M_BUILD_DEPS \
                     && \

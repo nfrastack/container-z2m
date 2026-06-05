@@ -5,7 +5,7 @@
 
 source /container/base/functions/container/init
 set -a
-prepare_service 20-z2m
+prepare_service 30-z2m
 set +a
 SERVICE_NAME="z2m"
 
