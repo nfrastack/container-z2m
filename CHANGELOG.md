@@ -3,6 +3,7 @@
    ### Added
       - MCP Server Support
 
+
 ## 1.1.5 2026-06-01 <code at nfrastack dot com>
 
    ### Added
