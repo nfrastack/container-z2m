@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 source /container/base/functions/container/init
-prepare_service 30-z2m
-prepare_service 31-mcp
+prepare_service 20-z2m
+prepare_service 30-mcp
 SERVICE_NAME="mcp"
 
 if var_true "${ENABLE_MCP}" ; then

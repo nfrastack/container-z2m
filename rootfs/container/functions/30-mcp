@@ -21,9 +21,9 @@ mcp_bootstrap_filesystem() {
 # SPDX-License-Identifier: MIT
 
 source /container/base/functions/container/run
-source /container/defaults/30-z2m
-source /container/defaults/31-mcp
-source /container/functions/31-mcp
+source /container/defaults/20-z2m
+source /container/defaults/30-mcp
+source /container/functions/30-mcp
 SERVICE_NAME="mcp"
 
 cd /app/mcp
