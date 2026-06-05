@@ -26,25 +26,22 @@ source /container/defaults/30-mcp
 source /container/functions/30-mcp
 SERVICE_NAME="mcp"
 
-case "\${MCP_LOG_TYPE,,}" in
-    both )
-        out=/dev/stdout
-        pipe="s6-setuidgid \${MCP_USER} tee -a \${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
-    ;;
-    console )
-        out=/dev/stdout
-        pipe="cat"
-    ;;
-    file )
-        out="\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
-        pipe="silent tee /dev/null"
-    ;;
-esac
 cd /app/mcp
 mcp_generate_environment
-exec s6-setuidgid "\${MCP_USER}" \
-                        node \
-                                dist/index.js | ts -m '%Y-%m-%dT%H:%M:%S' 2>&1 >> "\${out}" 2>&1 | \${pipe}
+
+print_start "Starting MCP Server"
+
+case "\${MCP_LOG_TYPE,,}" in
+    both )
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' | tee -a "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+    ;;
+    console )
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S'
+    ;;
+    file )
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' >> "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+    ;;
+esac
 EOF
 }
 
