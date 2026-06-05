@@ -33,13 +33,18 @@ print_start "Starting MCP Server"
 
 case "\${MCP_LOG_TYPE,,}" in
     both )
-        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' | tee -a "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+        #exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' | tee -a "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+        #exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' | tee -a "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js
+        #:
     ;;
     console )
-        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S'
+        #exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S'
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js
     ;;
     file )
-        exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' >> "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+        #exec s6-setuidgid "\${MCP_USER}" node dist/index.js 2>&1 | ts -m '%Y-%m-%dT%H:%M:%S' >> "\${MCP_LOG_PATH%/}/\${MCP_LOG_FILE}"
+        exec s6-setuidgid "\${MCP_USER}" node dist/index.js
     ;;
 esac
 EOF
