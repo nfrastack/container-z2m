@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    Z2M_VERSION="2.11.0" \
+    Z2M_VERSION="2.12.0" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt" \
     MCP_VERSION="dc3e5dea11238c5e55e8f79e6117f05a2507d927" \
     MCP_REPO_URL="https://github.com/ichbinder/MCP2ZigBee2MQTT"

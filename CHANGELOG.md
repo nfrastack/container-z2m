@@ -1,7 +1,8 @@
-## 1.1.6b 2026-06-05 <code at nfrastack dot com>
+## 1.2.0 2026-06-09 <code at nfrastack dot com>
 
    ### Added
-      - MCP Server Support
+      - Zigbee2MQTT 2.12.0
+      - Added MCP Server support
 
 
 ## 1.1.5 2026-06-01 <code at nfrastack dot com>
