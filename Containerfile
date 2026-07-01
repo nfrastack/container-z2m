@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    Z2M_VERSION="2.12.0" \
+    Z2M_VERSION="2.12.1" \
     Z2M_REPO_URL="https://github.com/koenkk/zigbee2mqtt" \
     MCP_VERSION="dc3e5dea11238c5e55e8f79e6117f05a2507d927" \
     MCP_REPO_URL="https://github.com/ichbinder/MCP2ZigBee2MQTT"
@@ -96,7 +96,7 @@ RUN echo "" && \
     \
     container_build_log add "Zigbee2MQTT" "${Z2M_VERSION}" "${Z2M_REPO_URL}" && \
     \
-    create_user mcp 23023 mcp 23023 /dev/null && \
+    create_user mcp 23.24 mcp 23.24 /dev/null && \
     add_user_group mcp z2m && \
     clone_git_repo "${MCP_REPO_URL}" "${MCP_VERSION}" /usr/src/mcp && \
     npm install && \

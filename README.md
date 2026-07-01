@@ -221,8 +221,8 @@ Below is the complete list of available options that can be used to customize yo
 | ----- | ----- | ---- |
 | User  | `z2m` | 2323 |
 | Group | `z2m` | 2323 |
-| User  | `mcp` | 23023 |
-| Group | `mcp` | 23023 |
+| User  | `mcp` | 23.24 |
+| Group | `mcp` | 23.24 |
 
 
 ### Networking

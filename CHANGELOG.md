@@ -1,3 +1,9 @@
+## 1.2.1 2026-06-30 <code at nfrastack dot com>
+
+   ### Added
+      - Z2M 2.12.1
+
+
 ## 1.2.0 2026-06-09 <code at nfrastack dot com>
 
    ### Added
