@@ -96,7 +96,7 @@ RUN echo "" && \
     \
     container_build_log add "Zigbee2MQTT" "${Z2M_VERSION}" "${Z2M_REPO_URL}" && \
     \
-    create_user mcp 23.24 mcp 23.24 /dev/null && \
+    create_user mcp 2324 mcp 2324 /dev/null && \
     add_user_group mcp z2m && \
     clone_git_repo "${MCP_REPO_URL}" "${MCP_VERSION}" /usr/src/mcp && \
     npm install && \
