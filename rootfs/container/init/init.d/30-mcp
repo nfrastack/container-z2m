@@ -12,6 +12,7 @@ if var_true "${ENABLE_MCP}" ; then
     print_info "Enabling MCP Functionality - use 'start-mcp' to start the service"
     mcp_preflight_check
     mcp_bootstrap_filesystem
+    mcp_patch_upstream_early_stdio
 else
     print_debug "MCP is disabled - Skipping initialization"
     liftoff
