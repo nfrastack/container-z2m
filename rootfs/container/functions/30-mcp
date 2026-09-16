@@ -23,7 +23,8 @@ mcp_bootstrap_filesystem() {
 : "\${DATA_PATH:=/data/}"
 : "\${MQTT_HOST:=mqtt://mqtt}"
 : "\${MQTT_TOPIC_BASE:=zigbee2mqtt}"
-: "\${MCP_USER:=mcp}"
+: "${MCP_USER:=mcp}"
+: "${MCP_CACHE_FILE:=z2m-mcp.db}"
 
 if [ -z "\${MCP_DATA_PATH}" ]; then
     MCP_DATA_PATH="\${DATA_PATH%/}/mcp"
@@ -58,10 +59,18 @@ mkdir -p "${MCP_DATA_PATH%/}" || exit 1
 chown "${MCP_USER}" "${MCP_DATA_PATH%/}" || exit 1
 cd /app/mcp || exit 1
 
+MCP_CACHE_DB="\${MCP_DATA_PATH%/}/\${MCP_CACHE_FILE}"
 MCP_TMP_DB="\$(mktemp "\${MCP_DATA_PATH%/}/.mcp-sess-XXXXXX")" || { echo "start-mcp: mktemp failed" >&2; exit 1; }
+if [ -f "\${MCP_CACHE_DB}" ] && [ "\$(head -c 6 "\${MCP_CACHE_DB}" 2>/dev/null)" = "SQLite" ]; then
+    cp -f "\${MCP_CACHE_DB}" "\${MCP_TMP_DB}" 2>/dev/null || echo "start-mcp: cache seed failed, starting cold" >&2
+fi
 chown "\${MCP_USER}" "\${MCP_TMP_DB}" || exit 1
 export DB_PATH="\${MCP_TMP_DB}"
 mcp_cleanup() {
+    if [ -f "\${MCP_TMP_DB}" ]; then
+        cp -f "\${MCP_TMP_DB}" "\${MCP_CACHE_DB}.new" 2>/dev/null && mv -f "\${MCP_CACHE_DB}.new" "\${MCP_CACHE_DB}" 2>/dev/null
+        chown "\${MCP_USER}" "\${MCP_CACHE_DB}" 2>/dev/null
+    fi
     rm -f "\${MCP_TMP_DB}" "\${MCP_TMP_DB}-journal" "\${MCP_TMP_DB}-wal" "\${MCP_TMP_DB}-shm"
 }
 trap mcp_cleanup EXIT INT TERM HUP
@@ -107,4 +116,41 @@ mcp_generate_environment() {
 mcp_preflight_check() {
     sanity_var MCP_MQTT_HOST "Hostname or IP address of your MQTT broker"
     sanity_var MCP_MQTT_TOPIC_BASE "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
+}
+
+mcp_patch_upstream_early_stdio() {
+    MCP_PATCH_TARGET="/app/mcp/dist/index.js"
+
+    [ -f "${MCP_PATCH_TARGET}" ] || return 0
+    grep -q "NFRAPATCH_EARLY_STDIO" "${MCP_PATCH_TARGET}" 2>/dev/null && return 0
+    grep -q "await startStdioMode(db, mqtt);" "${MCP_PATCH_TARGET}" 2>/dev/null || return 0
+
+    MCP_PATCH_SNIPPET="$(mktemp)" || return 0
+    cat > "${MCP_PATCH_SNIPPET}" << 'SNIPPET_EOF'
+    if (transportMode !== 'http') {
+        const earlyMcpServer = new ZigbeeMcpServer(db, mqtt, config.baseTopic);
+        const earlyTransport = new StdioServerTransport();
+        await earlyMcpServer.connect(earlyTransport);
+        logger.info('MCP Server ready (early stdio, discovery in progress)');
+    }
+SNIPPET_EOF
+
+    sed -i '/const mqtt = new MqttListener(config, db);/r '"${MCP_PATCH_SNIPPET}" "${MCP_PATCH_TARGET}" &&
+    sed -i '/^[[:space:]]*else {$/{N;N;/await startStdioMode(db, mqtt);/d}' "${MCP_PATCH_TARGET}"
+    MCP_PATCH_RC=$?
+    rm -f "${MCP_PATCH_SNIPPET}"
+
+    if [ "${MCP_PATCH_RC}" -ne 0 ] || ! grep -q "NFRAPATCH_EARLY_STDIO" "${MCP_PATCH_TARGET}" 2>/dev/null; then
+        print_error "Failed to apply MCP early-stdio patch to ${MCP_PATCH_TARGET}"
+        return 1
+    fi
+
+    if command -v node >/dev/null 2>&1 && [ -f "/app/mcp/package.json" ]; then
+        (cd /app/mcp && node --check dist/index.js) 2>/dev/null || {
+            print_error "MCP early-stdio patch produced invalid JS"
+            return 1
+        }
+    fi
+
+    return 0
 }
