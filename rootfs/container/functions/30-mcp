@@ -24,7 +24,6 @@ mcp_bootstrap_filesystem() {
 : "\${MQTT_HOST:=mqtt://mqtt}"
 : "\${MQTT_TOPIC_BASE:=zigbee2mqtt}"
 : "\${MCP_USER:=mcp}"
-: "\${MCP_DATA_FILE:=z2m-mcp.db}"
 
 if [ -z "\${MCP_DATA_PATH}" ]; then
     MCP_DATA_PATH="\${DATA_PATH%/}/mcp"
@@ -54,10 +53,34 @@ fi
 if [ -n "\${MCP_MQTT_PASS}" ]; then
     export MQTT_PASSWORD="\${MCP_MQTT_PASS}"
 fi
-export DB_PATH="\${MCP_DATA_PATH%/}/\${MCP_DATA_FILE}"
 
+mkdir -p "${MCP_DATA_PATH%/}" || exit 1
+chown "${MCP_USER}" "${MCP_DATA_PATH%/}" || exit 1
 cd /app/mcp || exit 1
-exec s6-setuidgid "\${MCP_USER}" node dist/index.js
+
+MCP_TMP_DB="\$(mktemp "\${MCP_DATA_PATH%/}/.mcp-sess-XXXXXX")" || { echo "start-mcp: mktemp failed" >&2; exit 1; }
+chown "\${MCP_USER}" "\${MCP_TMP_DB}" || exit 1
+export DB_PATH="\${MCP_TMP_DB}"
+mcp_cleanup() {
+    rm -f "\${MCP_TMP_DB}" "\${MCP_TMP_DB}-journal" "\${MCP_TMP_DB}-wal" "\${MCP_TMP_DB}-shm"
+}
+trap mcp_cleanup EXIT INT TERM HUP
+
+MCP_PIPE_DIR="\$(mktemp -d)" || { echo "start-mcp: mktemp -d failed" >&2; exit 1; }
+MCP_PIPE="\${MCP_PIPE_DIR}/stdin"
+mkfifo "\${MCP_PIPE}" || exit 1
+chown "\${MCP_USER}" "\${MCP_PIPE_DIR}" "\${MCP_PIPE}" || exit 1
+s6-setuidgid "\${MCP_USER}" node dist/index.js <"\${MCP_PIPE}" &
+MCP_NODE_PID=$!
+cat >"\${MCP_PIPE}"
+kill "${MCP_NODE_PID}" 2>/dev/null
+wait "${MCP_NODE_PID}" 2>/dev/null
+case "${MCP_PIPE_DIR}" in
+    /tmp/*) rm -rf "${MCP_PIPE_DIR}" ;;
+esac
+mcp_cleanup
+trap - EXIT INT TERM HUP
+exit 0
 EOF
 }
 
