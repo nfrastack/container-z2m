@@ -201,19 +201,54 @@ Below is the complete list of available options that can be used to customize yo
 
 ### MCP Server
 
-| Variable              | Description                          | Default              |
-| --------------------- | ------------------------------------ | -------------------- |
-| `ENABLE_MCP`          | Enable MCP Server                    | `FALSE`              |
-| `MCP_USER`            | User to run Z2M                      | `mcp`                |
-| `MCP_GROUP`           | Group to run Z2M                     | `mcp`                |
-| `MCP_LOG_PATH`        | Log directory                        | `/logs/`             |
-| `MCP_LOG_FILE`        | Log file name                        | `mcp.log`            |
-| `MCP_LOG_TYPE`        | Log type (console, file, both, none) | `both`               |
-| `MCP_LOG_LEVEL`       | Log level                            | `info`               |
-| `MCP_MQTT_HOST`       | MQTT broker hostname                 | `${MQTT_HOST}`       |
-| `MCP_MQTT_TOPIC_BASE` | Base topic for MQTT                  | `${MQTT_TOPIC_BASE}` |
+| Variable               | Description                                   | Default              |
+| ---------------------- | --------------------------------------------- | -------------------- |
+| `ENABLE_MCP`           | Enable MCP sidecar                            | `TRUE`               |
+| `MCP_TRANSPORT_MODE`   | `stdio` or `http`                             | `stdio`              |
+| `MCP_HTTP_LISTEN_PORT` | MCP HTTP listen port                          | `3235`               |
+| `MCP_NGINX_LISTEN_PORT` | Nginx MCP site listen port (SSE-safe proxy)  | `3236`               |
+| `MCP_API_KEY`          | Bearer key for HTTP transport (empty = open)  |                      |
+| `MCP_USER`             | User to run MCP                               | `mcp`                |
+| `MCP_GROUP`            | Group to run MCP                              | `mcp`                |
+| `MCP_LOG_PATH`         | Log directory                                 | `/logs/`             |
+| `MCP_LOG_FILE`         | Log file name                                 | `mcp.log`            |
+| `MCP_LOG_TYPE`         | Log type (console, file, both, none)          | `both`               |
+| `MCP_LOG_LEVEL`        | Log level                                     | `info`               |
+| `MCP_MQTT_HOST`        | MQTT broker hostname                          | `${MQTT_HOST}`       |
+| `MCP_MQTT_TOPIC_BASE`  | Base topic for MQTT                           | `${MQTT_TOPIC_BASE}` |
 
->> Utilize by execing into the contianer and typing `start-mcp`
+#### MCP Transports
+
+* `http` - Runs as a supervised service inside the container, listening on
+  `MCP_HTTP_LISTEN_PORT` (default `3235`) with SSE endpoints (`/sse`, `/messages`)
+  and `/health`. The bundled nginx also exposes an SSE-safe reverse proxy
+  (buffering off, 24h read timeout) — either on a dedicated port
+  `MCP_NGINX_LISTEN_PORT` (default `3236`), or, when `NGINX_SITE_MCP_SERVER_NAME`
+  is set (e.g. `mcpz2m.tiredofit.ca`), on port 80 as a vhost next to the z2m site
+  (`z2m.tiredofit.ca` -> frontend, `mcpz2m.tiredofit.ca` -> MCP). Publish or route
+  via Traefik (see `examples/compose.yml`). The MCP site never inherits nginx
+  authentication — clients authenticate with the Bearer token only:
+  `Authorization: Bearer <MCP_API_KEY>`. If `MCP_API_KEY` is empty, the endpoint is open.
+
+#### MCP Nginx Routing
+
+When `MCP_TRANSPORT_MODE=http`, the nginx `mcp` site is configured automatically.
+Where it listens is decided in this order:
+
+1. `NGINX_SITE_MCP_HTTP_LISTEN_PORT` — if set, used exactly as given.
+2. `NGINX_SITE_MCP_SERVER_NAME` — if set (e.g. `mcpz2m.tiredofit.ca`), the site
+   shares port 80 with the z2m site and nginx routes by `Host` header.
+   The z2m site is pinned `default_server` so unknown hosts land on the
+   frontend, never on MCP.
+3. Otherwise `MCP_NGINX_LISTEN_PORT` (default `3236`) — a dedicated listener
+   proxying to `127.0.0.1:MCP_HTTP_LISTEN_PORT`. No `Host` matching involved.
+
+The MCP site always forces nginx authentication to `none` (unless
+`NGINX_SITE_MCP_AUTHENTICATION_TYPE` is set explicitly), so the Bearer token
+is the only gate.
+* `stdio` - Interactive only. Exec into the container and run `start-mcp` with an
+  attached TTY (`docker exec -it <container> start-mcp`). There is no headless
+  service in this mode.
 
 ## Users and Groups
 
@@ -221,8 +256,8 @@ Below is the complete list of available options that can be used to customize yo
 | ----- | ----- | ---- |
 | User  | `z2m` | 2323 |
 | Group | `z2m` | 2323 |
-| User  | `mcp` | 23.24 |
-| Group | `mcp` | 23.24 |
+| User  | `mcp` | 2324 |
+| Group | `mcp` | 2324 |
 
 
 ### Networking

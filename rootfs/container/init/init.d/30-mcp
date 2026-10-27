@@ -9,13 +9,21 @@ prepare_service 30-mcp
 SERVICE_NAME="mcp"
 
 if var_true "${ENABLE_MCP}" ; then
-    print_info "Enabling MCP Functionality - use 'start-mcp' to start the service"
     mcp_preflight_check
     mcp_bootstrap_filesystem
-    mcp_patch_upstream_early_stdio
+    case "${MCP_TRANSPORT_MODE,,}" in
+        http)
+            print_info "Enabling MCP HTTP transport - listening on port ${MCP_HTTP_LISTEN_PORT}"
+            mcp_configure_nginx
+        ;;
+        *)
+            print_info "MCP stdio transport selected - use 'docker exec -it <container> start-mcp' for manual sessions"
+            service_stop 30-mcp
+        ;;
+    esac
 else
     print_debug "MCP is disabled - Skipping initialization"
-    liftoff
+    service_stop 30-mcp
 fi
 
 liftoff

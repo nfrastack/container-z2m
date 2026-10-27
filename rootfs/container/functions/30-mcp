@@ -14,74 +14,95 @@ mcp_bootstrap_filesystem() {
         ;;
     esac
 
-    write_file root:root@/usr/local/bin/start-mcp:755 << EOF
+    write_file root:root@/usr/local/bin/start-mcp:755 << 'EOF'
 #!/command/with-contenv sh
 # SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
-: "\${DATA_PATH:=/data/}"
-: "\${MQTT_HOST:=mqtt://mqtt}"
-: "\${MQTT_TOPIC_BASE:=zigbee2mqtt}"
+: "${DATA_PATH:=/data/}"
+: "${MQTT_HOST:=mqtt://mqtt}"
+: "${MQTT_TOPIC_BASE:=zigbee2mqtt}"
 : "${MCP_USER:=mcp}"
-: "${MCP_CACHE_FILE:=z2m-mcp.db}"
+: "${MCP_DATA_FILE:=z2m-mcp.db}"
+: "${MCP_DATA_PATH:=${DATA_PATH%/}/mcp}"
+: "${MCP_TRANSPORT_MODE:=stdio}"
+: "${MCP_HTTP_LISTEN_PORT:=3235}"
 
-if [ -z "\${MCP_DATA_PATH}" ]; then
-    MCP_DATA_PATH="\${DATA_PATH%/}/mcp"
+if [ -z "${MCP_MQTT_HOST}" ]; then
+    MCP_MQTT_HOST="${MQTT_HOST}"
 fi
-if [ -z "\${MCP_MQTT_HOST}" ]; then
-    MCP_MQTT_HOST="\${MQTT_HOST}"
+if [ -z "${MCP_MQTT_TOPIC_BASE}" ]; then
+    MCP_MQTT_TOPIC_BASE="${MQTT_TOPIC_BASE}"
 fi
-if [ -z "\${MCP_MQTT_TOPIC_BASE}" ]; then
-    MCP_MQTT_TOPIC_BASE="\${MQTT_TOPIC_BASE}"
+if [ -z "${MCP_MQTT_USER}" ]; then
+    MCP_MQTT_USER="${MQTT_USER}"
 fi
-if [ -z "\${MCP_MQTT_USER}" ]; then
-    MCP_MQTT_USER="\${MQTT_USER}"
-fi
-if [ -z "\${MCP_MQTT_PASS}" ]; then
-    MCP_MQTT_PASS="\${MQTT_PASS}"
+if [ -z "${MCP_MQTT_PASS}" ]; then
+    MCP_MQTT_PASS="${MQTT_PASS}"
 fi
 
-if [ -n "\${MCP_MQTT_HOST}" ]; then
-    export MQTT_BROKER_URL="\${MCP_MQTT_HOST}"
+if [ -n "${MCP_MQTT_HOST}" ]; then
+    export MQTT_BROKER_URL="${MCP_MQTT_HOST}"
 fi
-if [ -n "\${MCP_MQTT_TOPIC_BASE}" ]; then
-    export MQTT_BASE_TOPIC="\${MCP_MQTT_TOPIC_BASE}"
+if [ -n "${MCP_MQTT_TOPIC_BASE}" ]; then
+    export MQTT_BASE_TOPIC="${MCP_MQTT_TOPIC_BASE}"
 fi
-if [ -n "\${MCP_MQTT_USER}" ]; then
-    export MQTT_USERNAME="\${MCP_MQTT_USER}"
+if [ -n "${MCP_MQTT_USER}" ]; then
+    export MQTT_USERNAME="${MCP_MQTT_USER}"
 fi
-if [ -n "\${MCP_MQTT_PASS}" ]; then
-    export MQTT_PASSWORD="\${MCP_MQTT_PASS}"
+if [ -n "${MCP_MQTT_PASS}" ]; then
+    export MQTT_PASSWORD="${MCP_MQTT_PASS}"
+fi
+export TRANSPORT_MODE="$(echo "${MCP_TRANSPORT_MODE}" | tr '[:upper:]' '[:lower:]')"
+export HTTP_PORT="${MCP_HTTP_LISTEN_PORT}"
+if [ -n "${MCP_API_KEY}" ]; then
+    export API_KEY="${MCP_API_KEY}"
+fi
+if [ -n "${MCP_LOG_LEVEL}" ]; then
+    export LOG_LEVEL="${MCP_LOG_LEVEL}"
 fi
 
 mkdir -p "${MCP_DATA_PATH%/}" || exit 1
 chown "${MCP_USER}" "${MCP_DATA_PATH%/}" || exit 1
 cd /app/mcp || exit 1
 
-MCP_CACHE_DB="\${MCP_DATA_PATH%/}/\${MCP_CACHE_FILE}"
-MCP_TMP_DB="\$(mktemp "\${MCP_DATA_PATH%/}/.mcp-sess-XXXXXX")" || { echo "start-mcp: mktemp failed" >&2; exit 1; }
-if [ -f "\${MCP_CACHE_DB}" ] && [ "\$(head -c 6 "\${MCP_CACHE_DB}" 2>/dev/null)" = "SQLite" ]; then
-    cp -f "\${MCP_CACHE_DB}" "\${MCP_TMP_DB}" 2>/dev/null || echo "start-mcp: cache seed failed, starting cold" >&2
+_MCP_TRANSPORT_LC="$(echo "${MCP_TRANSPORT_MODE}" | tr '[:upper:]' '[:lower:]')"
+if [ "${_MCP_TRANSPORT_LC}" = "http" ] ; then
+    echo "Starting MCP Server (http transport on port ${MCP_HTTP_LISTEN_PORT})"
+    export DB_PATH="${MCP_DATA_PATH%/}/${MCP_DATA_FILE}"
+    exec s6-setuidgid "${MCP_USER}" node dist/index.js
 fi
-chown "\${MCP_USER}" "\${MCP_TMP_DB}" || exit 1
-export DB_PATH="\${MCP_TMP_DB}"
+
+if [ ! -t 0 ]; then
+    echo "[start-mcp] stdio transport requires an interactive terminal (docker exec -it <container> start-mcp)" >&2
+    echo "[start-mcp] for headless operation set MCP_TRANSPORT_MODE=http" >&2
+    exit 1
+fi
+
+MCP_CACHE_DB="${MCP_DATA_PATH%/}/${MCP_DATA_FILE}"
+MCP_TMP_DB="$(mktemp "${MCP_DATA_PATH%/}/.mcp-sess-XXXXXX")" || { echo "start-mcp: mktemp failed" >&2; exit 1; }
+if [ -f "${MCP_CACHE_DB}" ] && [ "$(head -c 6 "${MCP_CACHE_DB}" 2>/dev/null)" = "SQLite" ]; then
+    cp -f "${MCP_CACHE_DB}" "${MCP_TMP_DB}" 2>/dev/null || echo "[start-mcp] cache seed failed, starting cold" >&2
+fi
+chown "${MCP_USER}" "${MCP_TMP_DB}" || exit 1
+export DB_PATH="${MCP_TMP_DB}"
 mcp_cleanup() {
-    if [ -f "\${MCP_TMP_DB}" ]; then
-        cp -f "\${MCP_TMP_DB}" "\${MCP_CACHE_DB}.new" 2>/dev/null && mv -f "\${MCP_CACHE_DB}.new" "\${MCP_CACHE_DB}" 2>/dev/null
-        chown "\${MCP_USER}" "\${MCP_CACHE_DB}" 2>/dev/null
+    if [ -f "${MCP_TMP_DB}" ]; then
+        cp -f "${MCP_TMP_DB}" "${MCP_CACHE_DB}.new" 2>/dev/null && mv -f "${MCP_CACHE_DB}.new" "${MCP_CACHE_DB}" 2>/dev/null
+        chown "${MCP_USER}" "${MCP_CACHE_DB}" 2>/dev/null
     fi
-    rm -f "\${MCP_TMP_DB}" "\${MCP_TMP_DB}-journal" "\${MCP_TMP_DB}-wal" "\${MCP_TMP_DB}-shm"
+    rm -f "${MCP_TMP_DB}" "${MCP_TMP_DB}-journal" "${MCP_TMP_DB}-wal" "${MCP_TMP_DB}-shm"
 }
 trap mcp_cleanup EXIT INT TERM HUP
 
-MCP_PIPE_DIR="\$(mktemp -d)" || { echo "start-mcp: mktemp -d failed" >&2; exit 1; }
-MCP_PIPE="\${MCP_PIPE_DIR}/stdin"
-mkfifo "\${MCP_PIPE}" || exit 1
-chown "\${MCP_USER}" "\${MCP_PIPE_DIR}" "\${MCP_PIPE}" || exit 1
-s6-setuidgid "\${MCP_USER}" node dist/index.js <"\${MCP_PIPE}" &
+MCP_PIPE_DIR="$(mktemp -d)" || { echo "start-mcp: mktemp -d failed" >&2; exit 1; }
+MCP_PIPE="${MCP_PIPE_DIR}/stdin"
+mkfifo "${MCP_PIPE}" || exit 1
+chown "${MCP_USER}" "${MCP_PIPE_DIR}" "${MCP_PIPE}" || exit 1
+s6-setuidgid "${MCP_USER}" node dist/index.js <"${MCP_PIPE}" &
 MCP_NODE_PID=$!
-cat >"\${MCP_PIPE}"
+cat >"${MCP_PIPE}"
 kill "${MCP_NODE_PID}" 2>/dev/null
 wait "${MCP_NODE_PID}" 2>/dev/null
 case "${MCP_PIPE_DIR}" in
@@ -93,64 +114,79 @@ exit 0
 EOF
 }
 
-mcp_generate_environment() {
-    if [ -n "${MCP_MQTT_HOST}" ]; then
-        export MQTT_BROKER_URL="${MCP_MQTT_HOST}"
-    fi
-
-    if [ -n "${MCP_MQTT_TOPIC_BASE}" ]; then
-        export MQTT_BASE_TOPIC="${MCP_MQTT_TOPIC_BASE}"
-    fi
-
-    if [ -n "${MCP_MQTT_USER}" ]; then
-        export MQTT_USERNAME="${MCP_MQTT_USER}"
-    fi
-
-    if [ -n "${MCP_MQTT_PASS}" ]; then
-        export MQTT_PASSWORD="${MCP_MQTT_PASS}"
-    fi
-
-    export DB_PATH="${MCP_DATA_PATH%/}/${MCP_DATA_FILE}"
-}
-
 mcp_preflight_check() {
     sanity_var MCP_MQTT_HOST "Hostname or IP address of your MQTT broker"
     sanity_var MCP_MQTT_TOPIC_BASE "Base topic for Zigbee2MQTT to use when connecting to your MQTT broker"
 }
 
-mcp_patch_upstream_early_stdio() {
-    MCP_PATCH_TARGET="/app/mcp/dist/index.js"
+mcp_configure_nginx() {
+    if var_false "${ENABLE_NGINX}" ; then
+        print_debug "Nginx disabled - Skipping MCP site"
+        return
+    fi
+    if var_false "${ENABLE_MCP}" ; then
+        print_debug "MCP disabled - Skipping MCP site"
+        return
+    fi
+    if [ "${MCP_TRANSPORT_MODE,,}" != "http" ] ; then
+        print_debug "MCP stdio transport - Skipping MCP site"
+        return
+    fi
 
-    [ -f "${MCP_PATCH_TARGET}" ] || return 0
-    grep -q "NFRAPATCH_EARLY_STDIO" "${MCP_PATCH_TARGET}" 2>/dev/null && return 0
-    grep -q "await startStdioMode(db, mqtt);" "${MCP_PATCH_TARGET}" 2>/dev/null || return 0
+    if [ -z "${NGINX_SITE_MCP_HTTP_LISTEN_PORT:-}" ]; then
+        if [ -n "${NGINX_SITE_MCP_SERVER_NAME:-}" ]; then
+            export NGINX_SITE_MCP_HTTP_LISTEN_PORT="80"
+        else
+            export NGINX_SITE_MCP_HTTP_LISTEN_PORT="${MCP_NGINX_LISTEN_PORT:-3236}"
+        fi
+    fi
+    if [ -z "${NGINX_SITE_MCP_AUTHENTICATION_TYPE:-}" ]; then
+        export NGINX_SITE_MCP_AUTHENTICATION_TYPE="none"
+    fi
+    export NGINX_SITE_MCP_MODE="proxy"
+    if [ -z "${NGINX_SITE_MCP_PROXY_URL:-}" ]; then
+        export NGINX_SITE_MCP_PROXY_URL="http://127.0.0.1:${MCP_HTTP_LISTEN_PORT}"
+    fi
+    case ",${NGINX_SITE_ENABLED:-}," in
+        *,mcp,*) ;;
+        *) export NGINX_SITE_ENABLED="${NGINX_SITE_ENABLED:-},mcp" ;;
+    esac
 
-    MCP_PATCH_SNIPPET="$(mktemp)" || return 0
-    cat > "${MCP_PATCH_SNIPPET}" << 'SNIPPET_EOF'
-    if (transportMode !== 'http') {
-        const earlyMcpServer = new ZigbeeMcpServer(db, mqtt, config.baseTopic);
-        const earlyTransport = new StdioServerTransport();
-        await earlyMcpServer.connect(earlyTransport);
-        logger.info('MCP Server ready (early stdio, discovery in progress)');
-    }
-SNIPPET_EOF
+    if ! command -v nginx_site_enable >/dev/null 2>&1 ; then
+        [ -f "/container/functions/10-nginx" ] && . /container/functions/10-nginx
+    fi
+    print_info "Enabling MCP site in Nginx (port ${NGINX_SITE_MCP_HTTP_LISTEN_PORT} -> 127.0.0.1:${MCP_HTTP_LISTEN_PORT})"
+    call nginx_site_enable "mcp"
 
-    sed -i '/const mqtt = new MqttListener(config, db);/r '"${MCP_PATCH_SNIPPET}" "${MCP_PATCH_TARGET}" &&
-    sed -i '/^[[:space:]]*else {$/{N;N;/await startStdioMode(db, mqtt);/d}' "${MCP_PATCH_TARGET}"
-    MCP_PATCH_RC=$?
-    rm -f "${MCP_PATCH_SNIPPET}"
+    if [ "${NGINX_SITE_MCP_HTTP_LISTEN_PORT}" = "80" ]; then
+        MCP_Z2M_LISTEN_CONF="${NGINX_CONFIG_PATH%/}/sites.enabled/z2m/server-begin/10-http.conf"
+        if [ -f "${MCP_Z2M_LISTEN_CONF}" ] && ! grep -q "NFRAMCP_DEFAULT" "${MCP_Z2M_LISTEN_CONF}" 2>/dev/null; then
+            if grep -q "^\([[:space:]]*\)listen 80;" "${MCP_Z2M_LISTEN_CONF}" 2>/dev/null; then
+                sed -i 's/^\([[:space:]]*\)listen 80;/\1listen 80 default_server;  # NFRAMCP_DEFAULT/' "${MCP_Z2M_LISTEN_CONF}"
+                print_debug "Pinned z2m site as nginx default_server"
+            else
+                print_warn "Unexpected z2m listen layout, leaving nginx default server as is"
+            fi
+        fi
+    fi
 
-    if [ "${MCP_PATCH_RC}" -ne 0 ] || ! grep -q "NFRAPATCH_EARLY_STDIO" "${MCP_PATCH_TARGET}" 2>/dev/null; then
-        print_error "Failed to apply MCP early-stdio patch to ${MCP_PATCH_TARGET}"
+    MCP_NGINX_PROXY_CONF="${NGINX_CONFIG_PATH%/}/sites.enabled/mcp/location-pre/50-proxy.conf"
+    if [ -f "${MCP_NGINX_PROXY_CONF}" ]; then
+        if ! grep -q "NFRAMCP_SSE" "${MCP_NGINX_PROXY_CONF}" 2>/dev/null; then
+            sed -i 's/^[[:space:]]*proxy_read_timeout .*/    proxy_read_timeout 86400;  # NFRAMCP_SSE/' "${MCP_NGINX_PROXY_CONF}"
+            if [ "$(tail -n 1 "${MCP_NGINX_PROXY_CONF}" | tr -d '[:space:]')" != "}" ]; then
+                print_error "Unexpected MCP nginx proxy fragment layout: ${MCP_NGINX_PROXY_CONF}"
+                return 1
+            fi
+            MCP_NGINX_TMP_CONF="$(mktemp)" || return 1
+            sed '$d' "${MCP_NGINX_PROXY_CONF}" > "${MCP_NGINX_TMP_CONF}"
+            printf '%s\n' '    proxy_buffering off;  # NFRAMCP_SSE' '    proxy_cache off;  # NFRAMCP_SSE' '}' >> "${MCP_NGINX_TMP_CONF}"
+            cat "${MCP_NGINX_TMP_CONF}" > "${MCP_NGINX_PROXY_CONF}"
+            rm -f "${MCP_NGINX_TMP_CONF}"
+        fi
+        print_debug "MCP nginx proxy tuned for SSE: ${MCP_NGINX_PROXY_CONF}"
+    else
+        print_error "MCP nginx proxy fragment not found: ${MCP_NGINX_PROXY_CONF}"
         return 1
     fi
-
-    if command -v node >/dev/null 2>&1 && [ -f "/app/mcp/package.json" ]; then
-        (cd /app/mcp && node --check dist/index.js) 2>/dev/null || {
-            print_error "MCP early-stdio patch produced invalid JS"
-            return 1
-        }
-    fi
-
-    return 0
 }

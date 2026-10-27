@@ -1,3 +1,11 @@
+## 1.3.0 2026-10-27 <code at nfrastack dot com>
+
+   ### Added
+      - MCP HTTP Transport
+      - Supports Vhost naming by NGINX_SITE_MCP_SERVER_NAME
+      - Otherwise use MCP_NGINX_LISTEN_PORT for port based access
+
+
 ## 1.2.5 2026-10-01 <code at nfrastack dot com>
 
    ### Added

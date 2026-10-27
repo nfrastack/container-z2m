@@ -6,8 +6,16 @@ services:
       - traefik.enable=true
       - traefik.http.routers.z2m.rule=Host(`z2m.example.com`)
       - traefik.http.services.z2m.loadbalancer.server.port=8080
+      ## MCP via container nginx vhost (needs NGINX_SITE_MCP_SERVER_NAME below).
+      ## Both names hit container port 80; nginx routes by Host header.
+      #- traefik.http.routers.z2m-mcp.rule=Host(`mcpz2m.example.com`)
+      #- traefik.http.services.z2m-mcp.loadbalancer.server.port=80
+      ## ...or publish the dedicated MCP nginx port instead (no server name needed).
+      #- traefik.http.routers.z2m-mcp.rule=Host(`z2m-mcp.example.com`)
+      #- traefik.http.services.z2m-mcp.loadbalancer.server.port=3236
     #ports:
       #- 8080:8080
+      #- 3236:3236 # MCP via nginx SSE-safe proxy (MCP_TRANSPORT_MODE=http)
     volumes:
       - ./data/z2m:/data
       - ./logs/z2m:/logs
@@ -28,6 +36,15 @@ services:
       - FRONTEND_LISTEN_PORT=8080
 
       - ENABLE_OTA=false
+
+      ## MCP Server (port based, Bearer token). Pick ONE routing style above:
+      ## vhost (port 80 + NGINX_SITE_MCP_SERVER_NAME) or dedicated nginx port.
+      - ENABLE_MCP=true
+      - MCP_TRANSPORT_MODE=http
+      - MCP_HTTP_LISTEN_PORT=3235
+      - MCP_NGINX_LISTEN_PORT=3236 # nginx SSE-safe proxy -> 127.0.0.1:3235 (port mode)
+      #- NGINX_SITE_MCP_SERVER_NAME=mcpz2m.example.com # vhost mode: mcp shares port 80
+      - MCP_API_KEY=change-me-to-a-long-random-value # sent as `Authorization: Bearer <key>`
 
       - ZIGBEE_CHANNEL=25
       - ZIGBEE_TRANSMIT_POWER=20
