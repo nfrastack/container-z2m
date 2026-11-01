@@ -1,3 +1,8 @@
+## 1.3.1 2026-11-01 <code at nfrastack dot com>
+
+   ### Changed
+      - Zigbee2MQTT 2.14.3
+
 ## 1.3.0 2026-10-27 <code at nfrastack dot com>
 
    ### Added
